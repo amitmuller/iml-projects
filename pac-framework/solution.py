@@ -50,9 +50,9 @@ def _plot_svm(ax, X, y, sep_true, svm_clf, m, C):
 def _meshgrid(X, h=0.02, pad=1.0):
     x_min, x_max = X[:, 0].min() - pad, X[:, 0].max() + pad
     y_min, y_max = X[:, 1].min() - pad, X[:, 1].max() + pad
-    xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
+    xx_ret, yy_ret = np.meshgrid(np.arange(x_min, x_max, h),
                          np.arange(y_min, y_max, h))
-    return xx, yy
+    return xx_ret, yy_ret
 
 
 def _plot_decision(ax, clf, X_train, y_train, xx, yy, title):
@@ -133,10 +133,10 @@ def practical_2_runner(save_path=None):
 
         for c_name, clf in classifiers.items():
             clf.fit(X_train, y_train)
-
+            accuracy = accuracy_score(y_train, clf.predict(X_train))
             fig, ax = plt.subplots(figsize=(5, 4))
             _plot_decision(ax, clf, X_train, y_train, xx, yy,
-                           title=f"{d_name}" + "-" + f"{c_name}")
+                           title=f"{d_name}" + "-" + f"{c_name}" +f" accuracy: {accuracy}")
             plt.tight_layout()
 
             if save_path is None:

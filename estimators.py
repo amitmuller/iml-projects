@@ -34,7 +34,9 @@ class LinearRegression(BaseEstimator):
         loss : float
             Performance under MSE loss function
         """
-        raise NotImplementedError()
+        predictions = self._predict(X)
+        residuals = y - predictions
+        return np.mean(residuals ** 2)
 
 
 class Lasso(BaseEstimator):
@@ -66,7 +68,9 @@ class Lasso(BaseEstimator):
         loss : float
             Performance under MSE loss function
         """
-        raise NotImplementedError()
+        predictions = self._predict(X)
+        residuals = y - predictions
+        return np.mean(residuals ** 2)
 
 
 class RidgeRegression(BaseEstimator):
@@ -124,7 +128,16 @@ class RidgeRegression(BaseEstimator):
         -----
         Fits model with or without an intercept depending on value of `self.include_intercept_`
         """
-        raise NotImplementedError()
+        if self.include_intercept_:
+            X = np.hstack((np.ones((X.shape[0], 1)), X))
+
+        n_params = X.shape[1]
+
+        reg_matrix = self.lam_ * np.eye(n_params)
+        if self.include_intercept_:
+            reg_matrix[0, 0] = 0.0
+
+        self.coefs_ = np.linalg.inv(X.T @ X + reg_matrix) @ X.T @ y
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -140,7 +153,11 @@ class RidgeRegression(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        raise NotImplementedError()
+        design_matrix = X
+        if self.include_intercept_:
+            intercept_col = np.ones((design_matrix.shape[0], 1))
+            design_matrix = np.hstack((intercept_col, design_matrix))
+        return design_matrix @ self.coefs_
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -159,6 +176,9 @@ class RidgeRegression(BaseEstimator):
         loss : float
             Performance under MSE loss function
         """
-        raise NotImplementedError()
+        predictions = self._predict(X)
+        residuals = y - predictions
+        return np.mean(residuals ** 2)
+
 
 

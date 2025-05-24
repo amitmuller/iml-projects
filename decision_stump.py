@@ -68,7 +68,9 @@ class DecisionStump(BaseEstimator):
         Feature values strictly below threshold are predicted as `-sign` whereas values which equal
         to or above the threshold are predicted as `sign`
         """
-        raise NotImplementedError()
+        feature_values = X[:, self.j_]
+        below_threshold = feature_values < self.threshold_
+        return np.where(below_threshold, -self.sign_, self.sign_)
 
     def _find_threshold(self, values: np.ndarray, labels: np.ndarray, sign: int) -> Tuple[float, float]:
         """
@@ -100,7 +102,22 @@ class DecisionStump(BaseEstimator):
         For every tested threshold, values strictly below threshold are predicted as `-sign` whereas values
         which equal to or above the threshold are predicted as `sign`
         """
-        raise NotImplementedError()
+        # sort values and labels all together
+        order = np.argsort(values)
+        sorted_vals, sorted_lbls = values[order], labels[order]
+
+        # error is if threshold is before all valus
+        initial_error = np.sum(np.abs(sorted_lbls)[np.sign(sorted_lbls) == sign])
+
+        # error as if threshold move beiond each sample
+        errors = np.concatenate(
+            ([initial_error], initial_error - np.cumsum(sorted_lbls * sign))
+        )
+
+        thresholds = np.concatenate(([-np.inf], sorted_vals[1:], [np.inf]))
+
+        best_idx = np.argmin(errors)
+        return thresholds[best_idx], errors[best_idx]
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -119,4 +136,6 @@ class DecisionStump(BaseEstimator):
         loss : float
             Performance under missclassification loss function
         """
-        raise NotImplementedError()
+        predicted_labels = self._predict(X)
+        loss_value = misclassification_error(y_true=y, y_pred=predicted_labels)
+        return loss_value

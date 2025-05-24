@@ -8,7 +8,6 @@ from plotly.subplots import make_subplots
 from adaboost import AdaBoost
 from decision_stump import DecisionStump
 
-# ensure output directory exists
 OUTPUT_DIR = "/Users/amitmuller/Git projects/iml projects/graphs/ex3_iml"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -48,7 +47,7 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
         layout=go.Layout(
             width=600, height=400,
             title={"x": 0.5, "text": r"$\text{adaboost misclassification as function of number of classifiers}$"},
-            xaxis_title=r"$\text{iteration}$",
+            xaxis_title=r"$\text{num of learners}$",
             yaxis_title=r"$\text{misclassification error}$",
             margin=dict(l=40, r=40, t=60, b=40)
         )
